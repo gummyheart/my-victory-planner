@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS เดิมทั้งหมดของคุณ (ใช้ตัวเดิมได้เลยครับ) */
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; --exp-color: #fbbf24; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: 'Anuphan', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
@@ -17,18 +16,19 @@
         .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; }
         .exp-info { flex-grow: 1; }
         .exp-bar-bg { height: 12px; background: #334155; border-radius: 6px; overflow: hidden; margin-top: 10px; }
-        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1s; }
+        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 0.5s; }
         .panel { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 20px; }
         input, button { padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white; outline: none; }
-        .btn-add { background: var(--accent); color: #0f172a; border: none; font-weight: bold; cursor: pointer; }
+        .btn-add { background: var(--accent); color: #0f172a; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-add:hover { opacity: 0.8; }
         .task-list { list-style: none; padding: 0; }
         .task-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); }
         .task-item.done { border-left-color: var(--success); opacity: 0.6; }
         .task-dates { font-size: 0.75rem; color: var(--muted); margin-top: 5px; }
         .canvas-container { height: 180px; width: 100%; display: flex; justify-content: center; }
         .btn-reset { width: 100%; margin-top: 20px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); cursor: pointer; padding: 10px; border-radius: 10px; }
-        @media (max-width: 850px) { .container { grid-template-columns: 1fr; } .level-card { grid-column: span 1; } }
+        @media (max-width: 850px) { .container { grid-template-columns: 1fr; } .level-card { grid-column: span 1; } .input-box { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -38,7 +38,7 @@
         <div class="level-circle" id="lvlCircle">1</div>
         <div class="exp-info">
             <div style="display: flex; justify-content: space-between;">
-                <span id="rankName" style="font-weight: 600; color: var(--accent);">LOADING...</span>
+                <span id="rankName" style="font-weight: 600; color: var(--accent);">Victory Tracker</span>
                 <span id="streakDisplay" style="color: #f97316; font-weight: bold;">🔥 0 วัน</span>
             </div>
             <div class="exp-bar-bg"><div id="expProgress"></div></div>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="panel">
-        <h2>🎯 Cloud ภารกิจ</h2>
+        <h2>🎯 ภารกิจวันนี้</h2>
         <div class="input-box">
             <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่...">
             <input type="date" id="taskDate">
@@ -57,43 +57,54 @@
     </div>
 
     <div class="panel">
-        <div class="stat-group"><h2>📊 เดือนนี้</h2><div class="canvas-container"><canvas id="monthlyChart"></canvas></div></div>
+        <div class="stat-group"><h2>📊 ความสำเร็จเดือนนี้</h2><div class="canvas-container"><canvas id="monthlyChart"></canvas></div></div>
         <div class="stat-group"><h2>📈 รายสัปดาห์</h2><div class="canvas-container"><canvas id="weeklyChart"></canvas></div></div>
-        <button class="btn-reset" onclick="resetSystem()">♻️ รีเซ็ต Cloud Data</button>
+        <button class="btn-reset" onclick="resetSystem()">♻️ ล้างข้อมูลเครื่องนี้</button>
     </div>
 </div>
 
 <script>
-    // 1. วาง Firebase Config ของคุณตรงนี้
+    // --- 1. ใส่ Config ของคุณตรงนี้ ---
     const firebaseConfig = {
-        apiKey: "AIzaSyAICsJVroBaBbJUjgP7dnDFwlNkT7GrzD4",
-        authDomain: "easy-tracker-d466d.firebaseapp.com",
-        projectId: "easy-tracker-d466d",
-        storageBucket: "easy-tracker-d466d.firebasestorage.app",
-        messagingSenderId: "117589633291",
-        appId: "1:117589633291:web:e753759322565b24999a0e",
-        measurementId: "G-J48K9VWB7B"
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
     };
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const docRef = db.collection("planner").doc("user_data"); // ในเวอร์ชันจริงควรใช้ User ID จากระบบ Login
+
+    // --- 2. ระบบระบุตัวตนแบบไม่ต้อง Login (Unique Device ID) ---
+    if (!localStorage.getItem('v_tracker_uid')) {
+        const randomId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('v_tracker_uid', randomId);
+    }
+    const myUID = localStorage.getItem('v_tracker_uid');
+    const docRef = db.collection("planner").doc(myUID);
 
     let data = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
     let monthlyChart, weeklyChart;
 
-    // โหลดข้อมูลจาก Cloud
     async function init() {
         createCharts();
-        const doc = await docRef.get();
-        if (doc.exists()) {
-            data = doc.data();
-        } else {
-            await docRef.set(data);
+        try {
+            const doc = await docRef.get();
+            if (doc.exists()) {
+                data = { ...data, ...doc.data() }; // รวมข้อมูลจาก Cloud
+                console.log("Data loaded for ID:", myUID);
+            } else {
+                await docRef.set(data); // สร้างข้อมูลใหม่บน Cloud
+            }
+            checkStreak();
+            updateUI();
+        } catch (error) {
+            console.error("Firebase Error:", error);
+            alert("ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาตรวจสอบ Rules ใน Firebase Console");
         }
-        checkStreak();
-        updateUI();
     }
 
     function createCharts() {
@@ -104,8 +115,10 @@
     }
 
     async function save() {
-        await docRef.set(data);
-        updateUI();
+        try {
+            await docRef.set(data);
+            updateUI();
+        } catch (e) { console.error("Save error:", e); }
     }
 
     function addTask() {
@@ -119,26 +132,25 @@
 
     function toggleTask(id) {
         const task = data.tasks.find(t => t.id === id);
-        if (!task.done) { data.exp += 20; if (data.exp >= 100) { data.level += 1; data.exp = 0; } }
-        else { data.exp = Math.max(0, data.exp - 20); }
+        if (!task.done) { 
+            data.exp += 20; 
+            if (data.exp >= 100) { data.level += 1; data.exp = 0; } 
+        } else { 
+            data.exp = Math.max(0, data.exp - 20); 
+        }
         task.done = !task.done;
         save();
-    }
-
-    async function resetSystem() {
-        if(confirm("รีเซ็ตข้อมูลบน Cloud ทั้งหมด?")) {
-            data = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
-            await save();
-            location.reload();
-        }
     }
 
     function checkStreak() {
         const today = new Date().toLocaleDateString();
         if (data.lastLogin !== today) {
             const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            if (data.lastLogin === yesterday.toLocaleDateString()) data.streak += 1;
-            else data.streak = 1;
+            if (data.lastLogin === yesterday.toLocaleDateString()) {
+                data.streak += 1;
+            } else {
+                data.streak = 1;
+            }
             data.lastLogin = today;
             save();
         }
@@ -155,15 +167,29 @@
         data.tasks.forEach(t => {
             const li = document.createElement('li');
             li.className = `task-item ${t.done ? 'done' : ''}`;
-            li.innerHTML = `<div><input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})"><span style="margin-left:10px;">${t.name}</span><div class="task-dates">📅 ${t.created} | 🚩 ${t.due}</div></div>`;
+            li.innerHTML = `
+                <div>
+                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})">
+                    <span style="margin-left:10px;">${t.name}</span>
+                    <div class="task-dates">📅 สร้าง: ${t.created} | 🚩 กำหนด: ${t.due}</div>
+                </div>`;
             list.appendChild(li);
         });
 
-        const now = new Date();
-        const thisMonthTasks = data.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
-        const monthlyPercent = thisMonthTasks.length ? Math.round((thisMonthTasks.filter(t => t.done).length / thisMonthTasks.length) * 100) : 0;
-        monthlyChart.data.datasets[0].data = [monthlyPercent, 100 - monthlyPercent];
+        // อัปเดตกราฟ (ตัวอย่างคำนวณง่ายๆ)
+        const doneTasks = data.tasks.filter(t => t.done).length;
+        const totalTasks = data.tasks.length || 1;
+        const percent = Math.round((doneTasks / totalTasks) * 100);
+        monthlyChart.data.datasets[0].data = [percent, 100 - percent];
         monthlyChart.update();
+    }
+
+    async function resetSystem() {
+        if(confirm("ลบข้อมูลทั้งหมดหรือไม่?")) {
+            data = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
+            await save();
+            location.reload();
+        }
     }
 
     window.onload = init;
