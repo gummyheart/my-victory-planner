@@ -18,29 +18,25 @@
         .auth-card { background: var(--card); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
         .auth-card input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #475569; background: #334155; color: white; box-sizing: border-box; }
         .btn-auth { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
-        .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
 
         /* App UI */
         .container { max-width: 1100px; margin: 0 auto; display: none; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .level-card { grid-column: span 2; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 20px; }
-        .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
-        .exp-info { flex-grow: 1; }
+        .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; }
         .exp-bar-bg { height: 14px; background: #334155; border-radius: 7px; overflow: hidden; margin-top: 12px; }
-        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1s; }
         
         .grid { display: grid; grid-template-columns: 1fr 350px; gap: 25px; }
-        .panel { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .panel { background: var(--card); border-radius: 24px; padding: 25px; }
         .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-bottom: 25px; }
-        input, button { font-family: inherit; }
-        .task-item { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid var(--accent); transition: 0.3s; }
+        .task-item { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid var(--accent); }
         .task-item.done { border-left-color: var(--success); opacity: 0.6; }
         .task-dates { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
         .canvas-container { position: relative; height: 200px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .btn-reset { width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); cursor: pointer; padding: 12px; border-radius: 12px; transition: 0.3s; }
-        .btn-reset:hover { background: var(--danger); color: white; }
+        .btn-reset { width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); cursor: pointer; padding: 12px; border-radius: 12px; }
 
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } .level-card { flex-direction: column; text-align: center; } }
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -48,7 +44,6 @@
     <div id="authScreen" class="auth-container">
         <div class="auth-card">
             <h1 id="authTitle" style="color: var(--accent); font-size: 2rem; margin-bottom: 10px;">Victory Login</h1>
-            <p style="color: var(--muted); margin-bottom: 25px; font-size: 0.9rem;">บันทึกความก้าวหน้าบน Cloud ส่วนตัว</p>
             <input type="email" id="emailIn" placeholder="อีเมล">
             <input type="password" id="passIn" placeholder="รหัสผ่าน">
             <button class="btn-auth" onclick="handleAuth()" id="authBtn">เข้าสู่ระบบ</button>
@@ -67,8 +62,8 @@
                 <div class="level-circle" id="lvlCircle">1</div>
                 <div class="exp-info">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span id="rankName" style="font-weight: 700; color: var(--accent); letter-spacing: 1px;">TRAINEE</span>
-                        <span id="streakDisplay" style="color: #f97316; font-weight: 800; font-size: 1.1rem;">🔥 0 วัน</span>
+                        <span id="rankName" style="font-weight: 700; color: var(--accent);">TRAINEE</span>
+                        <span id="streakDisplay" style="color: #f97316; font-weight: 800;">🔥 0 วัน</span>
                     </div>
                     <div class="exp-bar-bg"><div id="expProgress"></div></div>
                     <div style="font-size: 0.85rem; color: var(--muted); margin-top: 10px;" id="expText">0 / 100 EXP</div>
@@ -78,8 +73,8 @@
             <div class="panel">
                 <h2 style="margin-bottom: 20px;">🎯 ภารกิจวันนี้</h2>
                 <div class="input-box">
-                    <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่..." style="grid-column: span 1; padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white;">
-                    <input type="date" id="taskDate" style="padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white;">
+                    <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่...">
+                    <input type="date" id="taskDate">
                     <button onclick="addTask()" style="background:var(--accent); color:#0f172a; border:none; font-weight:bold; cursor:pointer; padding:0 20px; border-radius:10px;">เพิ่ม</button>
                 </div>
                 <div id="taskList"></div>
@@ -148,7 +143,7 @@
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('displayEmail').innerText = user.email;
             await loadUserData(user.uid);
-            initCharts();
+            initCharts(); // บังคับสร้างกราฟหลังล็อกอิน
             updateUI();
         } else {
             document.getElementById('authScreen').style.display = 'flex';
@@ -272,7 +267,7 @@
         // Update Charts
         const done = thisMonthTasks.filter(t => t.done).length;
         const percent = thisMonthTasks.length ? Math.round((done / thisMonthTasks.length) * 100) : 0;
-        if(mChart.data) {
+        if(mChart && mChart.data) {
             mChart.data.datasets[0].data = [percent, 100 - percent];
             mChart.update();
         }
@@ -282,7 +277,7 @@
             const weekTasks = thisMonthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
             weeklyData[i-1] = weekTasks.length ? Math.round((weekTasks.filter(t => t.done).length / weekTasks.length) * 100) : 0;
         }
-        if(wChart.data) {
+        if(wChart && wChart.data) {
             wChart.data.datasets[0].data = weeklyData;
             wChart.update();
         }
