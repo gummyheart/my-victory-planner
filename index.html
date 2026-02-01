@@ -3,98 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Victory Tracker - Email Auth</title>
-    
+    <title>Victory Tracker - Cloud Mastery</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap" rel="stylesheet">
-
     <style>
-        :root {
-            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e;
-            --danger: #ef4444; --exp-color: #fbbf24; --text: #f8fafc; --muted: #94a3b8;
-        }
-
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; --exp-color: #fbbf24; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: 'Anuphan', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        /* Auth Styles */
-        .auth-screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .auth-card { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .auth-card input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white; box-sizing: border-box; }
-        .btn-auth { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--accent); color: #0f172a; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .toggle-link { margin-top: 15px; font-size: 0.85rem; color: var(--muted); cursor: pointer; text-decoration: underline; }
+        /* Auth UI */
+        .auth-container { height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .auth-card { background: var(--card); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        .auth-card input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #475569; background: #334155; color: white; box-sizing: border-box; }
+        .btn-auth { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
+        .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
 
-        /* Main App Styles */
+        /* App UI */
         .container { max-width: 1100px; margin: 0 auto; display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .level-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 10px; grid-column: span 2; }
-        .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
-        .exp-bar-bg { height: 12px; background: #334155; border-radius: 6px; overflow: hidden; margin-top: 10px; }
-        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1s; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .level-card { grid-column: span 2; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 20px; }
+        .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+        .exp-info { flex-grow: 1; }
+        .exp-bar-bg { height: 14px; background: #334155; border-radius: 7px; overflow: hidden; margin-top: 12px; }
+        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
         
-        .grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
-        .panel { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 20px; }
-        .task-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); }
+        .grid { display: grid; grid-template-columns: 1fr 350px; gap: 25px; }
+        .panel { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-bottom: 25px; }
+        input, button { font-family: inherit; }
+        .task-item { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid var(--accent); transition: 0.3s; }
         .task-item.done { border-left-color: var(--success); opacity: 0.6; }
-        .task-dates { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-        .canvas-container { position: relative; height: 180px; width: 100%; display: flex; justify-content: center; }
-        .btn-reset { width: 100%; margin-top: 20px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); cursor: pointer; padding: 10px; border-radius: 10px; }
+        .task-dates { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+        .canvas-container { position: relative; height: 200px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .btn-reset { width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); cursor: pointer; padding: 12px; border-radius: 12px; transition: 0.3s; }
+        .btn-reset:hover { background: var(--danger); color: white; }
 
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } .level-card { grid-column: span 1; } }
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } .level-card { flex-direction: column; text-align: center; } }
     </style>
 </head>
 <body>
 
-    <div id="authScreen" class="auth-screen">
+    <div id="authScreen" class="auth-container">
         <div class="auth-card">
-            <h1 id="authTitle" style="color: var(--accent);">Victory Login</h1>
-            <input type="email" id="emailInput" placeholder="อีเมล">
-            <input type="password" id="passInput" placeholder="รหัสผ่าน">
+            <h1 id="authTitle" style="color: var(--accent); font-size: 2rem; margin-bottom: 10px;">Victory Login</h1>
+            <p style="color: var(--muted); margin-bottom: 25px; font-size: 0.9rem;">บันทึกความก้าวหน้าบน Cloud ส่วนตัว</p>
+            <input type="email" id="emailIn" placeholder="อีเมล">
+            <input type="password" id="passIn" placeholder="รหัสผ่าน">
             <button class="btn-auth" onclick="handleAuth()" id="authBtn">เข้าสู่ระบบ</button>
-            <div class="toggle-link" onclick="toggleAuthMode()" id="toggleText">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</div>
+            <div style="margin-top: 20px; font-size: 0.85rem; color: var(--muted); cursor: pointer; text-decoration: underline;" onclick="toggleAuth()" id="authToggle">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</div>
         </div>
     </div>
 
     <div id="mainApp" class="container">
         <div class="header">
-            <div style="font-size: 0.9rem; color: var(--accent);">บัญชี: <span id="userEmailDisplay"></span></div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--muted); cursor:pointer; text-decoration:underline;">ออกจากระบบ</button>
+            <div style="font-size: 0.9rem; color: var(--accent); font-weight: 600;">บัญชี: <span id="displayEmail"></span></div>
+            <button onclick="logout()" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size: 0.8rem;">Logout [ออกจากระบบ]</button>
         </div>
 
         <div class="grid">
             <div class="level-card">
                 <div class="level-circle" id="lvlCircle">1</div>
-                <div style="flex-grow: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span id="rankName" style="font-weight: 600; color: var(--accent);">TRAINEE</span>
-                        <span id="streakDisplay" style="color: #f97316; font-weight: bold;">🔥 0 วัน</span>
+                <div class="exp-info">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="rankName" style="font-weight: 700; color: var(--accent); letter-spacing: 1px;">TRAINEE</span>
+                        <span id="streakDisplay" style="color: #f97316; font-weight: 800; font-size: 1.1rem;">🔥 0 วัน</span>
                     </div>
                     <div class="exp-bar-bg"><div id="expProgress"></div></div>
-                    <div style="font-size: 0.8rem; color: var(--muted); margin-top: 8px;" id="expText">0 / 100 EXP</div>
+                    <div style="font-size: 0.85rem; color: var(--muted); margin-top: 10px;" id="expText">0 / 100 EXP</div>
                 </div>
             </div>
 
             <div class="panel">
-                <h2>🎯 ภารกิจของฉัน</h2>
+                <h2 style="margin-bottom: 20px;">🎯 ภารกิจวันนี้</h2>
                 <div class="input-box">
-                    <input type="text" id="taskName" placeholder="ภารกิจใหม่...">
-                    <input type="date" id="taskDate">
-                    <button onclick="addTask()" style="background:var(--accent); color:#0f172a; border:none; font-weight:bold; cursor:pointer; padding:0 15px; border-radius:10px;">เพิ่ม</button>
+                    <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่..." style="grid-column: span 1; padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white;">
+                    <input type="date" id="taskDate" style="padding: 12px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white;">
+                    <button onclick="addTask()" style="background:var(--accent); color:#0f172a; border:none; font-weight:bold; cursor:pointer; padding:0 20px; border-radius:10px;">เพิ่ม</button>
                 </div>
-                <ul id="taskList" style="list-style:none; padding:0;"></ul>
+                <div id="taskList"></div>
             </div>
 
             <div class="panel">
                 <div class="stat-group">
-                    <h2>📊 เดือนนี้</h2>
+                    <h2 style="justify-content: center;">📊 เดือนนี้</h2>
                     <div class="canvas-container"><canvas id="monthlyChart"></canvas></div>
                 </div>
-                <div class="stat-group">
-                    <h2>📈 รายสัปดาห์</h2>
+                <div class="stat-group" style="margin-top: 30px;">
+                    <h2 style="justify-content: center;">📈 รายสัปดาห์ (%)</h2>
                     <div class="canvas-container"><canvas id="weeklyChart"></canvas></div>
                 </div>
                 <button class="btn-reset" onclick="resetSystem()">♻️ รีเซ็ตทั้งหมด</button>
@@ -103,56 +100,54 @@
     </div>
 
 <script>
-    // === 1. ใส่ Config ของคุณตรงนี้ ===
+    // === แก้ไข CONFIG จากรูปของคุณตรงนี้ ===
     const firebaseConfig = {
-        apiKey: "AIzaSyCgtWqqJw1_7yQRVKKUuyzve102W5tPs7g",
-        authDomain: "victory-tracker-2f18f.firebaseapp.com",
-        projectId: "victory-tracker-2f18f",
-        storageBucket: "victory-tracker-2f18f.firebasestorage.app",
-        messagingSenderId: "896361486667",
-        appId: "1:896361486667:web:b1e8b6159bb2edb7a830ce",
-        measurementId: "G-4FFFPYYXSV"
+      apiKey: "AIzaSyCgtWqqJw1_7yQRVKKUuyzve102W5tPs7g",
+      authDomain: "victory-tracker-2f18f.firebaseapp.com",
+      projectId: "victory-tracker-2f18f",
+      storageBucket: "victory-tracker-2f18f.firebasestorage.app",
+      messagingSenderId: "896361486667",
+      appId: "1:896361486667:web:b1e8b6159bb2edb7a830ce",
+      measurementId: "G-4FFFPYYXSV"
     };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let isLoginMode = true;
+    let isLogin = true;
     let userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
-    let monthlyChart, weeklyChart;
+    let mChart, wChart;
 
-    // --- Authentication ---
-    function toggleAuthMode() {
-        isLoginMode = !isLoginMode;
-        document.getElementById('authTitle').innerText = isLoginMode ? "Victory Login" : "Victory Register";
-        document.getElementById('authBtn').innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-        document.getElementById('toggleText').innerText = isLoginMode ? "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่" : "มีบัญชีแล้ว? เข้าสู่ระบบ";
+    // --- Authentication Logic ---
+    function toggleAuth() {
+        isLogin = !isLogin;
+        document.getElementById('authTitle').innerText = isLogin ? "Victory Login" : "Victory Register";
+        document.getElementById('authBtn').innerText = isLogin ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
+        document.getElementById('authToggle').innerText = isLogin ? "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่" : "มีบัญชีแล้ว? เข้าสู่ระบบ";
     }
 
     async function handleAuth() {
-        const email = document.getElementById('emailInput').value;
-        const pass = document.getElementById('passInput').value;
+        const email = document.getElementById('emailIn').value;
+        const pass = document.getElementById('passIn').value;
         if(!email || !pass) return alert("กรุณากรอกข้อมูล");
-
         try {
-            if(isLoginMode) {
-                await auth.signInWithEmailAndPassword(email, pass);
-            } else {
+            if(isLogin) await auth.signInWithEmailAndPassword(email, pass);
+            else {
                 await auth.createUserWithEmailAndPassword(email, pass);
                 alert("สมัครสมาชิกสำเร็จ!");
             }
         } catch (e) { alert(e.message); }
     }
 
-    function logout() { auth.signOut().then(() => location.reload()); }
+    function logout() { if(confirm("ออกจากระบบ?")) auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userEmailDisplay').innerText = user.email;
-            await loadData(user.uid);
+            document.getElementById('displayEmail').innerText = user.email;
+            await loadUserData(user.uid);
             initCharts();
             updateUI();
         } else {
@@ -161,8 +156,8 @@
         }
     });
 
-    // --- Data Logic ---
-    async function loadData(uid) {
+    // --- Database Logic ---
+    async function loadUserData(uid) {
         const doc = await db.collection("users").doc(uid).get();
         if (doc.exists()) {
             userData = doc.data();
@@ -172,8 +167,8 @@
         }
     }
 
-    async function syncCloud() {
-        if (auth.currentUser) {
+    async function sync() {
+        if(auth.currentUser) {
             await db.collection("users").doc(auth.currentUser.uid).set(userData);
             updateUI();
         }
@@ -183,23 +178,23 @@
         const today = new Date().toLocaleDateString();
         if (userData.lastLogin !== today) {
             const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            if (userData.lastLogin === yesterday.toLocaleDateString()) userData.streak += 1;
+            if (userData.lastLogin === yesterday.toLocaleDateString()) userData.streak++;
             else userData.streak = 1;
             userData.lastLogin = today;
-            syncCloud();
+            sync();
         }
     }
 
     function addTask() {
         const name = document.getElementById('taskName').value;
         const due = document.getElementById('taskDate').value;
-        if(!name || !due) return;
+        if(!name || !due) return alert("กรอกข้อมูลให้ครบ");
         userData.tasks.push({
             id: Date.now(), name, due, done: false,
             created: new Date().toLocaleDateString('th-TH', {day:'2-digit', month:'short'})
         });
         document.getElementById('taskName').value = '';
-        syncCloud();
+        sync();
     }
 
     function toggleTask(id) {
@@ -209,82 +204,89 @@
             if(userData.exp >= 100) { userData.level++; userData.exp = 0; }
         } else { userData.exp = Math.max(0, userData.exp - 20); }
         task.done = !task.done;
-        syncCloud();
+        sync();
     }
 
     function deleteTask(id) {
-        if(confirm("ลบภารกิจ?")) {
+        if(confirm("ลบภารกิจนี้?")) {
             userData.tasks = userData.tasks.filter(t => t.id !== id);
-            syncCloud();
+            sync();
         }
     }
 
     function resetSystem() {
-        if(confirm("ล้างข้อมูลทั้งหมด?")) {
+        if(confirm("⚠️ ล้างข้อมูลทั้งหมดในบัญชีนี้?")) {
             userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
-            syncCloud();
+            sync();
         }
     }
 
-    // --- Charts & UI ---
+    // --- Chart & UI Logic ---
     function initCharts() {
-        const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-        if(monthlyChart) monthlyChart.destroy();
-        if(weeklyChart) weeklyChart.destroy();
+        const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+        if(mChart) mChart.destroy();
+        if(wChart) wChart.destroy();
 
-        monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+        const ctxM = document.getElementById('monthlyChart').getContext('2d');
+        mChart = new Chart(ctxM, {
             type: 'doughnut',
-            data: { datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }] },
-            options: { ...common, cutout: '80%' }
+            data: { labels: ['สำเร็จ', 'เหลือ'], datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }] },
+            options: { ...commonOptions, cutout: '80%' }
         });
-        weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+
+        const ctxW = document.getElementById('weeklyChart').getContext('2d');
+        wChart = new Chart(ctxW, {
             type: 'bar',
-            data: { labels: ['W1', 'W2', 'W3', 'W4'], datasets: [{ data: [0,0,0,0], backgroundColor: '#38bdf8', borderRadius: 5 }] },
-            options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } }
+            data: { labels: ['W1', 'W2', 'W3', 'W4'], datasets: [{ label: '%', data: [0,0,0,0], backgroundColor: '#38bdf8', borderRadius: 6 }] },
+            options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#64748b' } } } }
         });
     }
 
     function updateUI() {
         document.getElementById('lvlCircle').innerText = userData.level;
         document.getElementById('expProgress').style.width = userData.exp + '%';
-        document.getElementById('expText').innerText = `${userData.exp} / 100 EXP`;
+        document.getElementById('expText').innerText = `${userData.exp} / 100 EXP (เลเวลถัดไป)`;
         document.getElementById('streakDisplay').innerText = `🔥 ${userData.streak} วัน`;
-        
+
         const list = document.getElementById('taskList');
         list.innerHTML = '';
         const now = new Date();
-        const monthTasks = userData.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
+        const thisMonthTasks = userData.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
 
-        monthTasks.forEach(t => {
-            const li = document.createElement('li');
-            li.className = `task-item ${t.done ? 'done' : ''}`;
-            li.innerHTML = `
+        thisMonthTasks.forEach(t => {
+            const div = document.createElement('div');
+            div.className = `task-item ${t.done ? 'done' : ''}`;
+            div.innerHTML = `
                 <div>
                     <div style="display:flex; align-items:center;">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})">
-                        <span style="margin-left:10px; font-weight:600;">${t.name}</span>
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})" style="transform: scale(1.2);">
+                        <span style="margin-left:12px; font-weight:600;">${t.name}</span>
                     </div>
                     <div class="task-dates">📅 ${t.created} | 🚩 กำหนด: ${t.due}</div>
                 </div>
-                <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+                <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size: 1.2rem;">✕</button>
             `;
-            list.appendChild(li);
+            list.appendChild(div);
         });
 
-        const done = monthTasks.filter(t => t.done).length;
-        const percent = monthTasks.length ? Math.round((done / monthTasks.length)*100) : 0;
-        monthlyChart.data.datasets[0].data = [percent, 100 - percent];
-        monthlyChart.update();
+        // Update Charts
+        const done = thisMonthTasks.filter(t => t.done).length;
+        const percent = thisMonthTasks.length ? Math.round((done / thisMonthTasks.length) * 100) : 0;
+        if(mChart.data) {
+            mChart.data.datasets[0].data = [percent, 100 - percent];
+            mChart.update();
+        }
 
         let weeklyData = [0,0,0,0];
         for(let i=1; i<=4; i++) {
-            const weekTasks = monthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
+            const weekTasks = thisMonthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
             weeklyData[i-1] = weekTasks.length ? Math.round((weekTasks.filter(t => t.done).length / weekTasks.length) * 100) : 0;
         }
-        weeklyChart.data.datasets[0].data = weeklyData;
-        weeklyChart.update();
+        if(wChart.data) {
+            wChart.data.datasets[0].data = weeklyData;
+            wChart.update();
+        }
     }
 </script>
 </body>
 </html>
-
