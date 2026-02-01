@@ -12,90 +12,69 @@
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e; --danger: #ef4444; --exp-color: #fbbf24; --text: #f8fafc; --muted: #94a3b8; }
         body { font-family: 'Anuphan', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        
-        /* Auth UI */
         .auth-container { height: 100vh; display: flex; justify-content: center; align-items: center; }
         .auth-card { background: var(--card); padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
         .auth-card input { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #475569; background: #334155; color: white; box-sizing: border-box; }
-        .btn-auth { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; font-size: 1rem; transition: 0.3s; }
-
-        /* App UI */
+        .btn-auth { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #0f172a; font-weight: 700; cursor: pointer; }
         .container { max-width: 1100px; margin: 0 auto; display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .level-card { grid-column: span 2; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 20px; }
+        .level-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 30px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 20px; }
         .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; }
-        .exp-bar-bg { height: 14px; background: #334155; border-radius: 7px; overflow: hidden; margin-top: 12px; }
-        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1s; }
-        
         .grid { display: grid; grid-template-columns: 1fr 350px; gap: 25px; }
         .panel { background: var(--card); border-radius: 24px; padding: 25px; }
-        .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-bottom: 25px; }
         .task-item { background: rgba(255,255,255,0.03); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-left: 5px solid var(--accent); }
-        .task-item.done { border-left-color: var(--success); opacity: 0.6; }
-        .task-dates { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
-        .canvas-container { position: relative; height: 200px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
-        .btn-reset { width: 100%; margin-top: 10px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: var(--danger); cursor: pointer; padding: 12px; border-radius: 12px; }
-
-        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } }
+        .canvas-container { position: relative; height: 200px; width: 100%; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="authScreen" class="auth-container">
         <div class="auth-card">
-            <h1 id="authTitle" style="color: var(--accent); font-size: 2rem; margin-bottom: 10px;">Victory Login</h1>
+            <h1 id="authTitle" style="color: var(--accent);">Victory Login</h1>
             <input type="email" id="emailIn" placeholder="อีเมล">
             <input type="password" id="passIn" placeholder="รหัสผ่าน">
             <button class="btn-auth" onclick="handleAuth()" id="authBtn">เข้าสู่ระบบ</button>
-            <div style="margin-top: 20px; font-size: 0.85rem; color: var(--muted); cursor: pointer; text-decoration: underline;" onclick="toggleAuth()" id="authToggle">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</div>
+            <div style="margin-top: 20px; font-size: 0.85rem; color: var(--muted); cursor: pointer;" onclick="toggleAuth()" id="authToggle">สมัครสมาชิกที่นี่</div>
         </div>
     </div>
 
     <div id="mainApp" class="container">
-        <div class="header">
-            <div style="font-size: 0.9rem; color: var(--accent); font-weight: 600;">บัญชี: <span id="displayEmail"></span></div>
-            <button onclick="logout()" style="background:none; border:none; color:var(--muted); cursor:pointer; font-size: 0.8rem;">Logout [ออกจากระบบ]</button>
+        <div style="display:flex; justify-content: space-between; margin-bottom: 20px;">
+            <div id="displayEmail" style="color:var(--accent)"></div>
+            <button onclick="logout()" style="background:none; border:none; color:var(--muted); cursor:pointer;">Logout</button>
+        </div>
+
+        <div class="level-card">
+            <div class="level-circle" id="lvlCircle">1</div>
+            <div style="flex-grow:1">
+                <div style="display:flex; justify-content:space-between">
+                    <span style="font-weight:700; color:var(--accent)">TRAINEE</span>
+                    <span id="streakDisplay" style="color:#f97316; font-weight:800">🔥 0 วัน</span>
+                </div>
+                <div style="height:14px; background:#334155; border-radius:7px; overflow:hidden; margin-top:10px;">
+                    <div id="expProgress" style="height:100%; width:0%; background:var(--exp-color); transition:1s;"></div>
+                </div>
+            </div>
         </div>
 
         <div class="grid">
-            <div class="level-card">
-                <div class="level-circle" id="lvlCircle">1</div>
-                <div class="exp-info">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span id="rankName" style="font-weight: 700; color: var(--accent);">TRAINEE</span>
-                        <span id="streakDisplay" style="color: #f97316; font-weight: 800;">🔥 0 วัน</span>
-                    </div>
-                    <div class="exp-bar-bg"><div id="expProgress"></div></div>
-                    <div style="font-size: 0.85rem; color: var(--muted); margin-top: 10px;" id="expText">0 / 100 EXP</div>
-                </div>
-            </div>
-
             <div class="panel">
-                <h2 style="margin-bottom: 20px;">🎯 ภารกิจวันนี้</h2>
-                <div class="input-box">
-                    <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่...">
+                <h2>🎯 ภารกิจวันนี้</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="taskName" placeholder="เพิ่มแผนงาน...">
                     <input type="date" id="taskDate">
-                    <button onclick="addTask()" style="background:var(--accent); color:#0f172a; border:none; font-weight:bold; cursor:pointer; padding:0 20px; border-radius:10px;">เพิ่ม</button>
+                    <button onclick="addTask()" style="background:var(--accent); border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer;">เพิ่ม</button>
                 </div>
                 <div id="taskList"></div>
             </div>
-
             <div class="panel">
-                <div class="stat-group">
-                    <h2 style="justify-content: center;">📊 เดือนนี้</h2>
-                    <div class="canvas-container"><canvas id="monthlyChart"></canvas></div>
-                </div>
-                <div class="stat-group" style="margin-top: 30px;">
-                    <h2 style="justify-content: center;">📈 รายสัปดาห์ (%)</h2>
-                    <div class="canvas-container"><canvas id="weeklyChart"></canvas></div>
-                </div>
-                <button class="btn-reset" onclick="resetSystem()">♻️ รีเซ็ตทั้งหมด</button>
+                <div class="canvas-container"><canvas id="monthlyChart"></canvas></div>
+                <div class="canvas-container"><canvas id="weeklyChart"></canvas></div>
             </div>
         </div>
     </div>
 
 <script>
-    // === แก้ไข CONFIG จากรูปของคุณตรงนี้ ===
+    // ใช้ค่าจริงจากรูป image_32ebc5.png ของคุณ
     const firebaseConfig = {
       apiKey: "AIzaSyCgtWqqJw1_7yQRVKKUuyzve102W5tPs7g",
       authDomain: "victory-tracker-2f18f.firebaseapp.com",
@@ -114,28 +93,22 @@
     let userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
     let mChart, wChart;
 
-    // --- Authentication Logic ---
     function toggleAuth() {
         isLogin = !isLogin;
         document.getElementById('authTitle').innerText = isLogin ? "Victory Login" : "Victory Register";
         document.getElementById('authBtn').innerText = isLogin ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-        document.getElementById('authToggle').innerText = isLogin ? "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่" : "มีบัญชีแล้ว? เข้าสู่ระบบ";
     }
 
     async function handleAuth() {
         const email = document.getElementById('emailIn').value;
         const pass = document.getElementById('passIn').value;
-        if(!email || !pass) return alert("กรุณากรอกข้อมูล");
         try {
             if(isLogin) await auth.signInWithEmailAndPassword(email, pass);
-            else {
-                await auth.createUserWithEmailAndPassword(email, pass);
-                alert("สมัครสมาชิกสำเร็จ!");
-            }
+            else { await auth.createUserWithEmailAndPassword(email, pass); alert("สมัครสำเร็จ!"); }
         } catch (e) { alert(e.message); }
     }
 
-    function logout() { if(confirm("ออกจากระบบ?")) auth.signOut().then(() => location.reload()); }
+    function logout() { auth.signOut().then(() => location.reload()); }
 
     auth.onAuthStateChanged(async (user) => {
         if (user) {
@@ -143,144 +116,66 @@
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('displayEmail').innerText = user.email;
             await loadUserData(user.uid);
-            initCharts(); // บังคับสร้างกราฟหลังล็อกอิน
+            initCharts();
             updateUI();
-        } else {
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
         }
     });
 
-    // --- Database Logic ---
     async function loadUserData(uid) {
-        const doc = await db.collection("users").doc(uid).get();
-        if (doc.exists()) {
+        // แก้ไขฟังก์ชันโหลดข้อมูลให้ถูกต้องตามที่ Console แจ้ง Error
+        const docRef = db.collection("users").doc(uid);
+        const doc = await docRef.get();
+        if (doc.exists) {
             userData = doc.data();
-            checkStreak();
         } else {
-            await db.collection("users").doc(uid).set(userData);
+            await docRef.set(userData);
         }
     }
 
-    async function sync() {
-        if(auth.currentUser) {
-            await db.collection("users").doc(auth.currentUser.uid).set(userData);
-            updateUI();
-        }
-    }
-
-    function checkStreak() {
-        const today = new Date().toLocaleDateString();
-        if (userData.lastLogin !== today) {
-            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            if (userData.lastLogin === yesterday.toLocaleDateString()) userData.streak++;
-            else userData.streak = 1;
-            userData.lastLogin = today;
-            sync();
-        }
-    }
-
-    function addTask() {
-        const name = document.getElementById('taskName').value;
-        const due = document.getElementById('taskDate').value;
-        if(!name || !due) return alert("กรอกข้อมูลให้ครบ");
-        userData.tasks.push({
-            id: Date.now(), name, due, done: false,
-            created: new Date().toLocaleDateString('th-TH', {day:'2-digit', month:'short'})
-        });
-        document.getElementById('taskName').value = '';
-        sync();
-    }
-
-    function toggleTask(id) {
-        const task = userData.tasks.find(t => t.id === id);
-        if(!task.done) {
-            userData.exp += 20;
-            if(userData.exp >= 100) { userData.level++; userData.exp = 0; }
-        } else { userData.exp = Math.max(0, userData.exp - 20); }
-        task.done = !task.done;
-        sync();
-    }
-
-    function deleteTask(id) {
-        if(confirm("ลบภารกิจนี้?")) {
-            userData.tasks = userData.tasks.filter(t => t.id !== id);
-            sync();
-        }
-    }
-
-    function resetSystem() {
-        if(confirm("⚠️ ล้างข้อมูลทั้งหมดในบัญชีนี้?")) {
-            userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
-            sync();
-        }
-    }
-
-    // --- Chart & UI Logic ---
     function initCharts() {
-        const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+        // ทำลายกราฟเก่าถ้ามี เพื่อป้องกันการซ้อนทับ
         if(mChart) mChart.destroy();
         if(wChart) wChart.destroy();
 
-        const ctxM = document.getElementById('monthlyChart').getContext('2d');
-        mChart = new Chart(ctxM, {
+        const commonOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+        mChart = new Chart(document.getElementById('monthlyChart'), {
             type: 'doughnut',
-            data: { labels: ['สำเร็จ', 'เหลือ'], datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }] },
+            data: { datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }] },
             options: { ...commonOptions, cutout: '80%' }
         });
-
-        const ctxW = document.getElementById('weeklyChart').getContext('2d');
-        wChart = new Chart(ctxW, {
+        wChart = new Chart(document.getElementById('weeklyChart'), {
             type: 'bar',
-            data: { labels: ['W1', 'W2', 'W3', 'W4'], datasets: [{ label: '%', data: [0,0,0,0], backgroundColor: '#38bdf8', borderRadius: 6 }] },
-            options: { ...commonOptions, scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#64748b' } } } }
+            data: { labels: ['W1', 'W2', 'W3', 'W4'], datasets: [{ data: [0,0,0,0], backgroundColor: '#38bdf8' }] },
+            options: commonOptions
         });
     }
 
     function updateUI() {
         document.getElementById('lvlCircle').innerText = userData.level;
         document.getElementById('expProgress').style.width = userData.exp + '%';
-        document.getElementById('expText').innerText = `${userData.exp} / 100 EXP (เลเวลถัดไป)`;
-        document.getElementById('streakDisplay').innerText = `🔥 ${userData.streak} วัน`;
-
+        
         const list = document.getElementById('taskList');
         list.innerHTML = '';
-        const now = new Date();
-        const thisMonthTasks = userData.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
-
-        thisMonthTasks.forEach(t => {
+        userData.tasks.forEach(t => {
             const div = document.createElement('div');
             div.className = `task-item ${t.done ? 'done' : ''}`;
-            div.innerHTML = `
-                <div>
-                    <div style="display:flex; align-items:center;">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})" style="transform: scale(1.2);">
-                        <span style="margin-left:12px; font-weight:600;">${t.name}</span>
-                    </div>
-                    <div class="task-dates">📅 ${t.created} | 🚩 กำหนด: ${t.due}</div>
-                </div>
-                <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size: 1.2rem;">✕</button>
-            `;
+            div.innerHTML = `<span>${t.name}</span> <small>${t.due}</small>`;
             list.appendChild(div);
         });
 
-        // Update Charts
-        const done = thisMonthTasks.filter(t => t.done).length;
-        const percent = thisMonthTasks.length ? Math.round((done / thisMonthTasks.length) * 100) : 0;
-        if(mChart && mChart.data) {
-            mChart.data.datasets[0].data = [percent, 100 - percent];
-            mChart.update();
-        }
+        const done = userData.tasks.filter(t => t.done).length;
+        const percent = userData.tasks.length ? Math.round((done / userData.tasks.length) * 100) : 0;
+        mChart.data.datasets[0].data = [percent, 100 - percent];
+        mChart.update();
+    }
 
-        let weeklyData = [0,0,0,0];
-        for(let i=1; i<=4; i++) {
-            const weekTasks = thisMonthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
-            weeklyData[i-1] = weekTasks.length ? Math.round((weekTasks.filter(t => t.done).length / weekTasks.length) * 100) : 0;
-        }
-        if(wChart && wChart.data) {
-            wChart.data.datasets[0].data = weeklyData;
-            wChart.update();
-        }
+    async function addTask() {
+        const name = document.getElementById('taskName').value;
+        const due = document.getElementById('taskDate').value;
+        if(!name || !due) return;
+        userData.tasks.push({ id: Date.now(), name, due, done: false });
+        await db.collection("users").doc(auth.currentUser.uid).set(userData);
+        updateUI();
     }
 </script>
 </body>
