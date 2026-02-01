@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Victory Tracker - Login Fix</title>
+    <title>Victory Tracker - Professional Fix</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -29,10 +29,10 @@
         .task-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); }
         .task-item.done { border-left-color: var(--success); opacity: 0.6; }
         .canvas-container { height: 200px; position: relative; margin-bottom: 20px; width: 100%; }
+        .btn-reset { width: 100%; margin-top: 20px; background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="loginScreen">
         <h1 style="color: var(--accent);">Victory Tracker</h1>
         <button class="btn-google" onclick="login()">
@@ -57,7 +57,7 @@
             <div class="level-circle" id="lvlCircle">1</div>
             <div style="flex-grow: 1;">
                 <div style="display: flex; justify-content: space-between;">
-                    <span id="rankName" style="font-weight: 600; color: var(--accent);">LEVEL UP</span>
+                    <span id="rankName" style="font-weight: 600; color: var(--accent);">TRAINEE</span>
                     <span id="expText" style="font-size: 0.8rem; color: var(--muted);">0 / 100 EXP</span>
                 </div>
                 <div class="exp-bar-bg"><div id="expProgress"></div></div>
@@ -77,19 +77,21 @@
             <div class="panel">
                 <div class="canvas-container"><canvas id="monthlyChart"></canvas></div>
                 <div class="canvas-container"><canvas id="weeklyChart"></canvas></div>
+                <button class="btn-reset" onclick="resetData()">♻️ รีเซ็ตทั้งหมด</button>
             </div>
         </div>
     </div>
 
 <script>
-    // === วาง CONFIG ของคุณตรงนี้ ===
+    // Config จากรูปภาพของคุณ
     const firebaseConfig = {
-        apiKey: "AIzaSyCgtWqqJw1_7yQRVKKUuyzve102W5tPs7g",
-        authDomain: "victory-tracker-2f18f.firebaseapp.com",
-        projectId: "victory-tracker-2f18f",
-        storageBucket: "victory-tracker-2f18f.firebasestorage.app",
-        messagingSenderId: "896361486667",
-        appId: "1:896361486667:web:b1e8b6159bb2edb7a830ce"
+      apiKey: "AIzaSyCgtWqqJw1_7yQRVKKUuyzve102W5tPs7g",
+      authDomain: "victory-tracker-2f18f.firebaseapp.com",
+      projectId: "victory-tracker-2f18f",
+      storageBucket: "victory-tracker-2f18f.firebasestorage.app",
+      messagingSenderId: "896361486667",
+      appId: "1:896361486667:web:b1e8b6159bb2edb7a830ce",
+      measurementId: "G-4FFFPYYXSV"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -105,20 +107,18 @@
     }
 
     function logout() {
-        auth.signOut().then(() => location.reload());
+        if(confirm("ออกจากระบบ?")) auth.signOut().then(() => location.reload());
     }
 
-    // จุดสำคัญ: ดึงข้อมูลและอัปเดต UI เมื่อ Login
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('userName').innerText = user.displayName;
             document.getElementById('userImg').src = user.photoURL;
-            
             await loadUserData(user.uid);
-            initCharts(); // สร้างกราฟใหม่หลังได้ข้อมูล
-            updateUI(); // วาดรายการงานใหม่
+            initCharts();
+            updateUI();
         } else {
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
@@ -126,14 +126,12 @@
     });
 
     async function loadUserData(uid) {
-        try {
-            const doc = await db.collection("users").doc(uid).get();
-            if (doc.exists()) {
-                userData = doc.data();
-            } else {
-                await db.collection("users").doc(uid).set(userData);
-            }
-        } catch (e) { console.error(e); }
+        const doc = await db.collection("users").doc(uid).get();
+        if (doc.exists()) {
+            userData = doc.data();
+        } else {
+            await db.collection("users").doc(uid).set(userData);
+        }
     }
 
     async function syncCloud() {
@@ -155,16 +153,28 @@
     function toggleTask(id) {
         const task = userData.tasks.find(t => t.id === id);
         task.done = !task.done;
-        // คำนวณ EXP
         if(task.done) { userData.exp += 20; if(userData.exp >= 100){ userData.level++; userData.exp=0; } }
         else { userData.exp = Math.max(0, userData.exp - 20); }
         syncCloud();
     }
 
+    function deleteTask(id) {
+        if(confirm("ลบภารกิจนี้?")) {
+            userData.tasks = userData.tasks.filter(t => t.id !== id);
+            syncCloud();
+        }
+    }
+
+    function resetData() {
+        if(confirm("รีเซ็ตทั้งหมด?")) {
+            userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
+            syncCloud();
+        }
+    }
+
     function initCharts() {
         if(monthlyChart) monthlyChart.destroy();
         if(weeklyChart) weeklyChart.destroy();
-        
         const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
         monthlyChart = new Chart(document.getElementById('monthlyChart'), {
             type: 'doughnut',
@@ -182,28 +192,25 @@
         document.getElementById('lvlCircle').innerText = userData.level;
         document.getElementById('expProgress').style.width = userData.exp + '%';
         document.getElementById('expText').innerText = `${userData.exp} / 100 EXP`;
-        
         const list = document.getElementById('taskList');
         list.innerHTML = '';
-        
         const now = new Date();
         const thisMonthTasks = userData.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
-
         thisMonthTasks.forEach(t => {
             const div = document.createElement('div');
             div.className = `task-item ${t.done ? 'done' : ''}`;
-            div.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})"> <span style="margin-left:10px;">${t.name}</span> <span style="font-size:0.7rem; color:var(--muted);">${t.due}</span>`;
+            div.innerHTML = `<div style="display:flex;align-items:center;"><input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})"> <span style="margin-left:10px;">${t.name}</span></div> <button onclick="deleteTask(${t.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;">✕</button>`;
             list.appendChild(div);
         });
-
         const done = thisMonthTasks.filter(t => t.done).length;
         const percent = thisMonthTasks.length ? Math.round((done / thisMonthTasks.length) * 100) : 0;
-        
         if(monthlyChart.data) {
             monthlyChart.data.datasets[0].data = [percent, 100 - percent];
             monthlyChart.update();
         }
     }
+
+    window.onload = () => { if(!auth.currentUser) document.getElementById('loginScreen').style.display = 'flex'; };
 </script>
 </body>
 </html>
