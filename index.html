@@ -3,315 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Victory Tracker - Full Edition</title>
+    <title>Victory Tracker - Email Auth</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #38bdf8;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --exp-color: #fbbf24;
-            --text: #f8fafc;
-            --muted: #94a3b8;
+            --bg: #0f172a; --card: #1e293b; --accent: #38bdf8; --success: #22c55e;
+            --danger: #ef4444; --exp-color: #fbbf24; --text: #f8fafc; --muted: #94a3b8;
         }
 
-        body {
-            font-family: 'Anuphan', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
-        }
-
-        /* Level & EXP Section */
-        .level-card {
-            grid-column: span 2;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 10px;
-        }
-
-        .level-circle {
-            width: 80px; height: 80px;
-            border: 4px solid var(--exp-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: 800;
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
-        }
-
-        .exp-info { flex-grow: 1; }
-        .exp-bar-bg {
-            height: 12px; background: #334155;
-            border-radius: 6px; overflow: hidden; margin-top: 10px;
-        }
-        #expProgress {
-            height: 100%; width: 0%;
-            background: linear-gradient(90deg, var(--exp-color), #f59e0b);
-            transition: 1s ease-out;
-        }
-
-        /* Panels */
-        .panel {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        h2 { margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
-
-        .input-box {
-            display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px;
-            margin-bottom: 20px;
-        }
-        input, button {
-            padding: 12px; border-radius: 10px; border: 1px solid #475569;
-            background: #334155; color: white; outline: none;
-            font-family: inherit;
-        }
-        .btn-add { background: var(--accent); color: #0f172a; border: none; font-weight: bold; cursor: pointer; }
-
-        /* Task List */
-        .task-list { list-style: none; padding: 0; }
-        .task-item {
-            background: rgba(255,255,255,0.03);
-            padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; align-items: center; justify-content: space-between;
-            border-left: 4px solid var(--accent);
-            transition: 0.3s;
-        }
-        .task-item.done { border-left-color: var(--success); opacity: 0.6; }
-
-        .task-details { display: flex; flex-direction: column; gap: 4px; }
-        .task-dates { font-size: 0.75rem; color: var(--muted); }
-        .date-badge { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
-
-        /* Stats Section */
-        .stat-group { margin-bottom: 30px; text-align: center; }
-        .canvas-container { position: relative; height: 180px; width: 100%; display: flex; justify-content: center; }
+        body { font-family: 'Anuphan', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        .btn-reset {
-            width: 100%; margin-top: 20px; background: transparent;
-            border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger);
-            cursor: pointer; font-size: 0.8rem; padding: 10px; border-radius: 10px;
-        }
-        .btn-reset:hover { background: var(--danger); color: white; }
+        /* Auth Styles */
+        .auth-screen { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .auth-card { background: var(--card); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .auth-card input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #475569; background: #334155; color: white; box-sizing: border-box; }
+        .btn-auth { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--accent); color: #0f172a; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .toggle-link { margin-top: 15px; font-size: 0.85rem; color: var(--muted); cursor: pointer; text-decoration: underline; }
 
-        footer {
-            grid-column: span 2; margin-top: 40px; padding: 30px 0;
-            border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--muted);
-        }
+        /* Main App Styles */
+        .container { max-width: 1100px; margin: 0 auto; display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .level-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 30px; margin-bottom: 10px; grid-column: span 2; }
+        .level-circle { width: 80px; height: 80px; border: 4px solid var(--exp-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 0 15px rgba(251, 191, 36, 0.3); }
+        .exp-bar-bg { height: 12px; background: #334155; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+        #expProgress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--exp-color), #f59e0b); transition: 1s; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 350px; gap: 20px; }
+        .panel { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .input-box { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 20px; }
+        .task-item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); }
+        .task-item.done { border-left-color: var(--success); opacity: 0.6; }
+        .task-dates { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+        .canvas-container { position: relative; height: 180px; width: 100%; display: flex; justify-content: center; }
+        .btn-reset { width: 100%; margin-top: 20px; background: transparent; border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); cursor: pointer; padding: 10px; border-radius: 10px; }
 
-        @media (max-width: 850px) {
-            .container { grid-template-columns: 1fr; }
-            .level-card, footer { grid-column: span 1; }
-        }
+        @media (max-width: 850px) { .grid { grid-template-columns: 1fr; } .level-card { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="level-card">
-        <div class="level-circle" id="lvlCircle">1</div>
-        <div class="exp-info">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="rankName" style="font-weight: 600; color: var(--accent);">TRAINEE</span>
-                <span id="streakDisplay" style="color: #f97316; font-weight: bold;">🔥 0 วัน</span>
-            </div>
-            <div class="exp-bar-bg"><div id="expProgress"></div></div>
-            <div style="font-size: 0.8rem; color: var(--muted); margin-top: 8px;" id="expText">0 / 100 EXP</div>
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-card">
+            <h1 id="authTitle" style="color: var(--accent);">Victory Login</h1>
+            <input type="email" id="emailInput" placeholder="อีเมล">
+            <input type="password" id="passInput" placeholder="รหัสผ่าน">
+            <button class="btn-auth" onclick="handleAuth()" id="authBtn">เข้าสู่ระบบ</button>
+            <div class="toggle-link" onclick="toggleAuthMode()" id="toggleText">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</div>
         </div>
     </div>
 
-    <div class="panel">
-        <h2>🎯 ภารกิจของฉัน</h2>
-        <div class="input-box">
-            <input type="text" id="taskName" placeholder="เพิ่มแผนงานใหม่...">
-            <input type="date" id="taskDate">
-            <button class="btn-add" onclick="addTask()">เพิ่ม</button>
+    <div id="mainApp" class="container">
+        <div class="header">
+            <div style="font-size: 0.9rem; color: var(--accent);">บัญชี: <span id="userEmailDisplay"></span></div>
+            <button onclick="logout()" style="background:none; border:none; color:var(--muted); cursor:pointer; text-decoration:underline;">ออกจากระบบ</button>
         </div>
-        <ul class="task-list" id="taskList"></ul>
-    </div>
 
-    <div class="panel">
-        <div class="stat-group">
-            <h2>📊 ความคืบหน้าเดือนนี้</h2>
-            <div class="canvas-container">
-                <canvas id="monthlyChart"></canvas>
+        <div class="grid">
+            <div class="level-card">
+                <div class="level-circle" id="lvlCircle">1</div>
+                <div style="flex-grow: 1;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span id="rankName" style="font-weight: 600; color: var(--accent);">TRAINEE</span>
+                        <span id="streakDisplay" style="color: #f97316; font-weight: bold;">🔥 0 วัน</span>
+                    </div>
+                    <div class="exp-bar-bg"><div id="expProgress"></div></div>
+                    <div style="font-size: 0.8rem; color: var(--muted); margin-top: 8px;" id="expText">0 / 100 EXP</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🎯 ภารกิจของฉัน</h2>
+                <div class="input-box">
+                    <input type="text" id="taskName" placeholder="ภารกิจใหม่...">
+                    <input type="date" id="taskDate">
+                    <button onclick="addTask()" style="background:var(--accent); color:#0f172a; border:none; font-weight:bold; cursor:pointer; padding:0 15px; border-radius:10px;">เพิ่ม</button>
+                </div>
+                <ul id="taskList" style="list-style:none; padding:0;"></ul>
+            </div>
+
+            <div class="panel">
+                <div class="stat-group">
+                    <h2>📊 เดือนนี้</h2>
+                    <div class="canvas-container"><canvas id="monthlyChart"></canvas></div>
+                </div>
+                <div class="stat-group">
+                    <h2>📈 รายสัปดาห์</h2>
+                    <div class="canvas-container"><canvas id="weeklyChart"></canvas></div>
+                </div>
+                <button class="btn-reset" onclick="resetSystem()">♻️ รีเซ็ตทั้งหมด</button>
             </div>
         </div>
-        <div class="stat-group">
-            <h2>📈 รายสัปดาห์ (%)</h2>
-            <div class="canvas-container">
-                <canvas id="weeklyChart"></canvas>
-            </div>
-        </div>
-        <div id="achievementLog" style="font-size: 0.85rem; color: var(--muted); border-top: 1px solid #475569; padding-top: 15px;">
-            <b style="color: var(--text);">บันทึกรวม:</b><br>
-            <span id="totalDoneText">สำเร็จ 0 ภารกิจ</span>
-        </div>
-        <button class="btn-reset" onclick="resetSystem()">♻️ รีเซ็ตค่าเริ่มต้นทั้งหมด</button>
     </div>
-
-    <footer>
-        <div class="copyright">© 2026 Victory Tracker. Build for Discipline.</div>
-    </footer>
-</div>
 
 <script>
-    const DEFAULT_DATA = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
-    let data = JSON.parse(localStorage.getItem('victory_planner_v7')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+    // === 1. ใส่ Config ของคุณตรงนี้ ===
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "your-project.firebaseapp.com",
+        projectId: "your-project",
+        storageBucket: "your-project.appspot.com",
+        messagingSenderId: "...",
+        appId: "..."
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let isLoginMode = true;
+    let userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
     let monthlyChart, weeklyChart;
 
-    function init() {
-        createCharts();
-        checkStreak();
-        updateUI();
+    // --- Authentication ---
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        document.getElementById('authTitle').innerText = isLoginMode ? "Victory Login" : "Victory Register";
+        document.getElementById('authBtn').innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
+        document.getElementById('toggleText').innerText = isLoginMode ? "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่" : "มีบัญชีแล้ว? เข้าสู่ระบบ";
     }
 
-    function createCharts() {
-        const ctxM = document.getElementById('monthlyChart');
-        monthlyChart = new Chart(ctxM, {
-            type: 'doughnut',
-            data: {
-                labels: ['สำเร็จ', 'เหลือ'],
-                datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
+    async function handleAuth() {
+        const email = document.getElementById('emailInput').value;
+        const pass = document.getElementById('passInput').value;
+        if(!email || !pass) return alert("กรุณากรอกข้อมูล");
 
-        const ctxW = document.getElementById('weeklyChart');
-        weeklyChart = new Chart(ctxW, {
-            type: 'bar',
-            data: {
-                labels: ['W1', 'W2', 'W3', 'W4'],
-                datasets: [{ label: '%', data: [0,0,0,0], backgroundColor: '#38bdf8', borderRadius: 5 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
-        });
+        try {
+            if(isLoginMode) {
+                await auth.signInWithEmailAndPassword(email, pass);
+            } else {
+                await auth.createUserWithEmailAndPassword(email, pass);
+                alert("สมัครสมาชิกสำเร็จ!");
+            }
+        } catch (e) { alert(e.message); }
+    }
+
+    function logout() { auth.signOut().then(() => location.reload()); }
+
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userEmailDisplay').innerText = user.email;
+            await loadData(user.uid);
+            initCharts();
+            updateUI();
+        } else {
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+        }
+    });
+
+    // --- Data Logic ---
+    async function loadData(uid) {
+        const doc = await db.collection("users").doc(uid).get();
+        if (doc.exists()) {
+            userData = doc.data();
+            checkStreak();
+        } else {
+            await db.collection("users").doc(uid).set(userData);
+        }
+    }
+
+    async function syncCloud() {
+        if (auth.currentUser) {
+            await db.collection("users").doc(auth.currentUser.uid).set(userData);
+            updateUI();
+        }
     }
 
     function checkStreak() {
         const today = new Date().toLocaleDateString();
-        if (data.lastLogin !== today) {
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            if (data.lastLogin === yesterday.toLocaleDateString()) data.streak += 1;
-            else data.streak = 1;
-            data.lastLogin = today;
-            save();
+        if (userData.lastLogin !== today) {
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            if (userData.lastLogin === yesterday.toLocaleDateString()) userData.streak += 1;
+            else userData.streak = 1;
+            userData.lastLogin = today;
+            syncCloud();
         }
     }
 
     function addTask() {
         const name = document.getElementById('taskName').value;
         const due = document.getElementById('taskDate').value;
-        if (!name || !due) return alert("กรุณากรอกข้อมูลให้ครบ");
-        
-        data.tasks.push({
-            id: Date.now(),
-            name,
-            due,
-            created: new Date().toLocaleDateString('th-TH', { day:'2-digit', month:'short', year:'2-digit' }),
-            done: false
+        if(!name || !due) return;
+        userData.tasks.push({
+            id: Date.now(), name, due, done: false,
+            created: new Date().toLocaleDateString('th-TH', {day:'2-digit', month:'short'})
         });
         document.getElementById('taskName').value = '';
-        save();
+        syncCloud();
     }
 
     function toggleTask(id) {
-        const task = data.tasks.find(t => t.id === id);
-        if (!task.done) {
-            data.exp += 20;
-            if (data.exp >= 100) { data.level += 1; data.exp = 0; }
-        } else { data.exp = Math.max(0, data.exp - 20); }
+        const task = userData.tasks.find(t => t.id === id);
+        if(!task.done) {
+            userData.exp += 20;
+            if(userData.exp >= 100) { userData.level++; userData.exp = 0; }
+        } else { userData.exp = Math.max(0, userData.exp - 20); }
         task.done = !task.done;
-        save();
+        syncCloud();
     }
 
     function deleteTask(id) {
-        if(confirm('ลบภารกิจนี้?')) { data.tasks = data.tasks.filter(t => t.id !== id); save(); }
-    }
-
-    function resetSystem() {
-        if(confirm("⚠️ รีเซ็ตข้อมูลทั้งหมด?")) {
-            data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-            save();
-            location.reload(); 
+        if(confirm("ลบภารกิจ?")) {
+            userData.tasks = userData.tasks.filter(t => t.id !== id);
+            syncCloud();
         }
     }
 
-    function save() {
-        localStorage.setItem('victory_planner_v7', JSON.stringify(data));
-        updateUI();
+    function resetSystem() {
+        if(confirm("ล้างข้อมูลทั้งหมด?")) {
+            userData = { tasks: [], exp: 0, level: 1, lastLogin: null, streak: 0 };
+            syncCloud();
+        }
+    }
+
+    // --- Charts & UI ---
+    function initCharts() {
+        const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+        if(monthlyChart) monthlyChart.destroy();
+        if(weeklyChart) weeklyChart.destroy();
+
+        monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [0, 100], backgroundColor: ['#22c55e', '#334155'], borderWidth: 0 }] },
+            options: { ...common, cutout: '80%' }
+        });
+        weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+            type: 'bar',
+            data: { labels: ['W1', 'W2', 'W3', 'W4'], datasets: [{ data: [0,0,0,0], backgroundColor: '#38bdf8', borderRadius: 5 }] },
+            options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } }
+        });
     }
 
     function updateUI() {
-        document.getElementById('lvlCircle').innerText = data.level;
-        document.getElementById('expProgress').style.width = data.exp + '%';
-        document.getElementById('expText').innerText = `${data.exp} / 100 EXP`;
-        document.getElementById('streakDisplay').innerText = `🔥 ${data.streak} วัน`;
+        document.getElementById('lvlCircle').innerText = userData.level;
+        document.getElementById('expProgress').style.width = userData.exp + '%';
+        document.getElementById('expText').innerText = `${userData.exp} / 100 EXP`;
+        document.getElementById('streakDisplay').innerText = `🔥 ${userData.streak} วัน`;
         
         const list = document.getElementById('taskList');
         list.innerHTML = '';
-        
-        data.tasks.forEach(t => {
+        const now = new Date();
+        const monthTasks = userData.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
+
+        monthTasks.forEach(t => {
             const li = document.createElement('li');
             li.className = `task-item ${t.done ? 'done' : ''}`;
             li.innerHTML = `
-                <div class="task-details">
+                <div>
                     <div style="display:flex; align-items:center;">
                         <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggleTask(${t.id})">
                         <span style="margin-left:10px; font-weight:600;">${t.name}</span>
                     </div>
-                    <div class="task-dates">
-                        <span class="date-badge">📅 สร้าง: ${t.created}</span>
-                        <span class="date-badge">🚩 กำหนด: ${t.due}</span>
-                    </div>
+                    <div class="task-dates">📅 ${t.created} | 🚩 กำหนด: ${t.due}</div>
                 </div>
-                <button onclick="deleteTask(${t.id})" style="color:#ef4444; background:none; border:none; cursor:pointer; font-size:1.2rem;">✕</button>
+                <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
             `;
             list.appendChild(li);
         });
 
-        // อัปเดตกราฟ (เหมือนเดิม)
-        const now = new Date();
-        const thisMonthTasks = data.tasks.filter(t => new Date(t.due).getMonth() === now.getMonth());
-        const doneCount = thisMonthTasks.filter(t => t.done).length;
-        const monthlyPercent = thisMonthTasks.length ? Math.round((doneCount / thisMonthTasks.length) * 100) : 0;
-        
-        monthlyChart.data.datasets[0].data = [monthlyPercent, 100 - monthlyPercent];
+        const done = monthTasks.filter(t => t.done).length;
+        const percent = monthTasks.length ? Math.round((done / monthTasks.length)*100) : 0;
+        monthlyChart.data.datasets[0].data = [percent, 100 - percent];
         monthlyChart.update();
 
         let weeklyData = [0,0,0,0];
         for(let i=1; i<=4; i++) {
-            const weekTasks = thisMonthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
+            const weekTasks = monthTasks.filter(t => Math.ceil(new Date(t.due).getDate()/7) === i);
             weeklyData[i-1] = weekTasks.length ? Math.round((weekTasks.filter(t => t.done).length / weekTasks.length) * 100) : 0;
         }
         weeklyChart.data.datasets[0].data = weeklyData;
         weeklyChart.update();
-        document.getElementById('totalDoneText').innerText = `สำเร็จรวมทั้งหมด ${data.tasks.filter(t => t.done).length} งาน`;
     }
-
-    window.onload = init;
 </script>
 </body>
 </html>
